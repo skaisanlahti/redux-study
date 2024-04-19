@@ -3,7 +3,7 @@ import { todoStore } from "./todo/todoStore";
 import { listener } from "./listener";
 
 export const store = configureStore({
-    reducer: { todo: todoStore.reducer },
+    reducer: { [todoStore.name]: todoStore.reducer },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().prepend(listener.middleware);
     },

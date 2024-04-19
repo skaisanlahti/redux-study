@@ -7,18 +7,26 @@ import {
     fetchRandomTodos,
     fetchTodos,
     removeTodo,
+    selectTodoError,
     selectTodoLoading,
     selectTodos,
+    taskInputChanged,
     toggleTodo,
 } from "./store/todo/todoStore";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { uuid } from "./utils/uuid";
 
 function App() {
     const dispatch = useAppDispatch();
     const todos = useAppSelector(selectTodos);
     const loading = useAppSelector(selectTodoLoading);
+    const error = useAppSelector(selectTodoError);
     const [task, setTask] = useState("");
+
+    function taskChanged(e: ChangeEvent<HTMLInputElement>) {
+        setTask(e.target.value);
+        dispatch(taskInputChanged());
+    }
 
     function toggle(id: string) {
         dispatch(toggleTodo(id));
@@ -32,6 +40,7 @@ function App() {
         if (!task) {
             return;
         }
+
         dispatch(addTodo({ id: uuid(), task, done: false }));
         setTask("");
     }
@@ -56,7 +65,8 @@ function App() {
             </div>
             <h1>Vite + React</h1>
             <button onClick={random}>random</button>
-            <input type="text" value={task} onChange={(e) => setTask(e.target.value)} />
+            <input type="text" value={task} onChange={taskChanged} />
+            {error && <p>{error}</p>}
             <button onClick={add}>Add</button>
             {loading && <p>loading</p>}
             {todos.map((t) => {
