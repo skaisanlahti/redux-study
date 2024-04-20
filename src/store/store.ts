@@ -1,11 +1,11 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { todoReducer } from "../components/todos";
+import { configureStore } from "@reduxjs/toolkit";
+import { todoReducer } from "../features/todos";
 import { listener } from "./listener";
 
 export const store = configureStore({
-    reducer: combineReducers({
+    reducer: {
         todos: todoReducer,
-    }),
+    },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().prepend(listener.middleware);
     },

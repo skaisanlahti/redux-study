@@ -1,5 +1,13 @@
-import { useAppDispatch, useAppSelector } from "../store/util";
-import { taskChanged, taskSubmitted } from "./todos";
+import { createAction } from "@reduxjs/toolkit";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+
+const taskChanged = createAction<string>("[AddTodo] task changed");
+const taskSubmitted = createAction<string>("[AddTodo] task submitted");
+
+export const AddTodoActions = {
+    taskChanged,
+    taskSubmitted,
+};
 
 export function AddTodo() {
     const dispatch = useAppDispatch();

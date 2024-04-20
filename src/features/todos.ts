@@ -1,6 +1,8 @@
-import { createAction, createReducer } from "@reduxjs/toolkit";
+import { createReducer } from "@reduxjs/toolkit";
 import { uuid } from "../utils/uuid";
-import { addAppHandler } from "../store/listener";
+import { AppStartListening } from "../store/listener";
+import { AddTodoActions } from "./AddTodo";
+import { TodoListActions } from "./TodoList";
 
 export type Todo = {
     id: string;
@@ -30,29 +32,28 @@ function getInitialState() {
     }
 }
 
-export const taskChanged = createAction<string>("ADD_TODO_TASK_CHANGED");
-export const taskSubmitted = createAction<string>("ADD_TODO_TASK_SUBMITTED");
-export const todoRemoved = createAction<string>("TODO_LIST_TODO_REMOVED");
-export const todoToggled = createAction<string>("TODO_LIST_TODO_TOGGLED");
-
-export const todoReducer = createReducer(getInitialState(), (reducer) => {
-    reducer.addCase(taskChanged, (state, action) => {
+export const todoReducer = createReducer(getInitialState, (reducer) => {
+    reducer.addCase(AddTodoActions.taskChanged, (state, action) => {
         state.task = action.payload;
         state.error = "";
     });
-    reducer.addCase(taskSubmitted, (state, action) => {
+    reducer.addCase(AddTodoActions.taskSubmitted, (state, action) => {
+        if (!action.payload) {
+            return;
+        }
+
         const todo = { id: uuid(), task: action.payload, done: false };
         state.items.push(todo);
         state.task = "";
         state.error = "";
     });
-    reducer.addCase(todoRemoved, (state, action) => {
+    reducer.addCase(TodoListActions.todoRemoved, (state, action) => {
         const index = state.items.findIndex((item) => item.id === action.payload);
         if (index !== -1) {
             state.items.splice(index, 1);
         }
     });
-    reducer.addCase(todoToggled, (state, action) => {
+    reducer.addCase(TodoListActions.todoToggled, (state, action) => {
         const index = state.items.findIndex((item) => item.id === action.payload);
         if (index !== -1) {
             const item = state.items[index];
@@ -61,20 +62,22 @@ export const todoReducer = createReducer(getInitialState(), (reducer) => {
     });
 });
 
-addAppHandler({
-    predicate: (_, current, previous) => {
-        return current.todos !== previous.todos;
-    },
-    effect: async (_, handler) => {
-        handler.cancelActiveListeners();
-        await handler.delay(200);
+export function setupTodoListeners(startListening: AppStartListening) {
+    startListening({
+        predicate: (_, current, previous) => {
+            return current.todos !== previous.todos;
+        },
+        effect: async (_, handler) => {
+            handler.cancelActiveListeners();
+            await handler.delay(200);
 
-        const state = handler.getState().todos;
-        try {
-            const json = JSON.stringify(state);
-            localStorage.setItem("todos", json);
-        } catch (e) {
-            console.error(e);
-        }
-    },
-});
+            const state = handler.getState().todos;
+            try {
+                const json = JSON.stringify(state);
+                localStorage.setItem("todos", json);
+            } catch (e) {
+                console.error(e);
+            }
+        },
+    });
+}

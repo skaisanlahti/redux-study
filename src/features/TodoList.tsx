@@ -1,9 +1,18 @@
-import { useAppDispatch, useAppSelector } from "../store/util";
-import { todoRemoved, todoToggled } from "./todos";
+import { createAction } from "@reduxjs/toolkit";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+
+const todoToggled = createAction<string>("[TodoList] todo toggled");
+const todoRemoved = createAction<string>("[TodoList] todo removed");
+
+export const TodoListActions = {
+    todoToggled,
+    todoRemoved,
+};
 
 export function TodoList() {
     const dispatch = useAppDispatch();
     const items = useAppSelector((state) => state.todos.items);
+
     return (
         <div>
             {items.map((item) => (
