@@ -1,5 +1,5 @@
 import { Draft, produce } from "immer";
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { State, Subscriber, Unsubscriber } from "./state";
 import { createTypeSafeContext } from "./context";
 
@@ -20,9 +20,11 @@ export type EffectContext<TState, TPayload> = {
     action: Action<TPayload>;
     currentState: TState;
     previousState: TState;
+    dispatch: Dispatch;
 };
 
 export type Effect<TState, TPayload> = (context: EffectContext<TState, TPayload>) => any;
+export type Remover = () => void;
 
 export function createAction<TPayload>(description: string = "unnamed action"): ActionCreator<TPayload> {
     const key = Symbol.for(description);
@@ -50,15 +52,21 @@ export class Store<TState> {
         this.state = new State(initialState);
     }
 
-    public addHandler = <TPayload>(action: ActionCreator<TPayload>, handler: Handler<TState, TPayload>): void => {
+    public addHandler = <TPayload>(action: ActionCreator<TPayload>, handler: Handler<TState, TPayload>): Remover => {
         this.handlersByKey.set(action.key, handler);
+        return () => {
+            this.handlersByKey.delete(action.key);
+        };
     };
 
-    public addEffect = <TPayload>(effect: Effect<TState, TPayload>): void => {
+    public addEffect = <TPayload>(effect: Effect<TState, TPayload>): Remover => {
         this.effects.push(effect);
+        return () => {
+            this.effects.splice(this.effects.indexOf(effect), 1);
+        };
     };
 
-    public dispatch = (action: Action<unknown>) => {
+    public dispatch = (action: Action<unknown>): void => {
         const state = this.state.get();
         let newState = state;
 
@@ -75,6 +83,7 @@ export class Store<TState> {
             action,
             currentState: newState,
             previousState: state,
+            dispatch: this.dispatch,
         };
 
         for (const effect of this.effects) {
@@ -107,7 +116,7 @@ export function createStoreHooks<TState>() {
         return providedStore.dispatch;
     }
 
-    function useStoreValue<R>(selector: (state: TState) => R) {
+    function useStoreValue<TResult>(selector: (state: TState) => TResult): TResult {
         const providedStore = useStore();
         return useSyncExternalStore(providedStore.subscribe, () => {
             return selector(providedStore.getState());

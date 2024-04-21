@@ -9,8 +9,8 @@ export class Disposer {
     }
 
     public dispose(): void {
-        for (const dispose of this.disposers) {
-            dispose();
+        for (const disposer of this.disposers) {
+            disposer();
         }
 
         this.disposers = [];

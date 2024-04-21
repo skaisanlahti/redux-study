@@ -1,5 +1,5 @@
 import { sleep } from "../../utils/sleep";
-import { Store } from "../../utils/store";
+import { EffectContext, Store } from "../../utils/store";
 import { RootState } from "../store";
 import { goodbye, hello, increment } from "./actions";
 
@@ -9,13 +9,7 @@ export function setupGreetingEffects(store: Store<RootState>) {
             return;
         }
 
-        store.dispatch(increment());
-    });
-
-    store.addEffect((context) => {
-        if (context.currentState.greetings.greeting === context.previousState.greetings.greeting) {
-            return;
-        }
+        context.dispatch(increment());
     });
 
     store.addEffect(async (context) => {
@@ -25,16 +19,24 @@ export function setupGreetingEffects(store: Store<RootState>) {
 
         await sleep(5000);
 
-        store.dispatch(goodbye("Goodbye world"));
+        context.dispatch(goodbye("Goodbye world"));
     });
 
-    store.addEffect((context) => {
-        console.log(context.action.key.description, "state changed?", context.currentState !== context.previousState);
-    });
+    store.addEffect(logAction);
 
-    store.addEffect(() => {
-        if (Math.random() > 0.5) {
-            throw new Error("random error in handler");
-        }
-    });
+    //store.addEffect(() => {
+    //    try {
+    //        if (Math.random() > 0.5) {
+    //            throw new Error("random error in handler");
+    //        }
+    //    } catch (e) {
+    //        console.log("caught error correctly", e);
+    //    }
+    //});
+}
+
+function logAction(context: EffectContext<RootState, unknown>) {
+    console.log(
+        `action: ${context.action.key.description}, state ${context.currentState === context.previousState ? "did not change" : "changed"}`,
+    );
 }
