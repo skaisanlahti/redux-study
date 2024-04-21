@@ -13,5 +13,34 @@ export const mySelectDone = myCreateSelector([(state: RootState) => state.todos.
 
 export function myCreateSelector(...createSelectorArgs: any[]) {
     console.log(createSelectorArgs);
-    return;
+    let lastResult: any;
+
+    let resultFunc = createSelectorArgs.pop();
+    const dependencies = createSelectorArgs[0];
+
+    let memoizedResultFunc = memoize(function () {
+        return resultFunc.apply(null, arguments);
+    });
+
+    const selector = argsMemoize(function selector() {
+        const inputSelectorResults = collectInputSelectorResults(dependencies, arguments);
+
+        lastResult = memoizedResultFunc.apply(null, inputSelectorResults);
+        return lastResult;
+    });
+
+    return selector;
+}
+
+function memoize(func: any) {
+    return func;
+}
+
+function argsMemoize(func: any) {
+    return func;
+}
+
+function collectInputSelectorResults(deps: any, args: any) {
+    console.log(deps);
+    return args;
 }
