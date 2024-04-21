@@ -1,5 +1,5 @@
 import { Draft, produce } from "immer";
-import { useRef, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { State, Subscriber, Unsubscriber } from "./state";
 import { createTypeSafeContext } from "./context";
 
@@ -67,22 +67,22 @@ export class Store<TState> {
     };
 
     public dispatch = (action: Action<unknown>): void => {
-        const state = this.state.get();
-        let newState = state;
+        const currentState = this.state.get();
+        let nextState = currentState;
 
         const handler = this.handlersByKey.get(action.key);
         if (handler) {
-            newState = produce<TState>(state, (draft) => {
+            nextState = produce<TState>(currentState, (draft) => {
                 handler(draft, action);
             });
 
-            this.state.set(newState);
+            this.state.set(nextState);
         }
 
         const context = {
             action,
-            currentState: newState,
-            previousState: state,
+            currentState: nextState,
+            previousState: currentState,
             dispatch: this.dispatch,
         };
 
