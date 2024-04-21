@@ -1,20 +1,7 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { uuid } from "../utils/uuid";
-import { AppStartListening } from "../store/listener";
-import { AddTodoActions } from "./AddTodo";
-import { TodoListActions } from "./TodoList";
-
-export type Todo = {
-    id: string;
-    task: string;
-    done: boolean;
-};
-
-export type TodoState = {
-    task: string;
-    error: string;
-    items: Todo[];
-};
+import { TodoState } from "./types";
+import { uuid } from "../../utils/uuid";
+import { AddTodoActions, TodoListActions } from "./actions";
 
 const initialState: TodoState = { task: "", error: "", items: [] };
 function getInitialState() {
@@ -28,6 +15,7 @@ function getInitialState() {
         return loadedState;
     } catch (e) {
         console.error(e);
+        localStorage.removeItem("todos");
         return initialState;
     }
 }
@@ -61,23 +49,3 @@ export const todoReducer = createReducer(getInitialState, (reducer) => {
         }
     });
 });
-
-export function setupTodoListeners(startListening: AppStartListening) {
-    startListening({
-        predicate: (_, current, previous) => {
-            return current.todos !== previous.todos;
-        },
-        effect: async (_, handler) => {
-            handler.cancelActiveListeners();
-            await handler.delay(200);
-
-            const state = handler.getState().todos;
-            try {
-                const json = JSON.stringify(state);
-                localStorage.setItem("todos", json);
-            } catch (e) {
-                console.error(e);
-            }
-        },
-    });
-}

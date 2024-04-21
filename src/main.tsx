@@ -2,15 +2,15 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { Provider } from "react-redux";
-import { store } from "./store/store.ts";
+import { StoreProvider } from "./features/hooks.ts";
+import { store } from "./features/store.ts";
 
 async function main() {
     ReactDOM.createRoot(document.getElementById("root")!).render(
         <React.StrictMode>
-            <Provider store={store}>
+            <StoreProvider value={store}>
                 <App />
-            </Provider>
+            </StoreProvider>
         </React.StrictMode>,
     );
 }

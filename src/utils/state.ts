@@ -1,39 +1,37 @@
-import { useCallback, useSyncExternalStore } from "react";
+export type Subscriber<TState> = (state: TState) => void;
+export type Unsubscriber = () => void;
+export type Updater<TState> = (state: TState) => TState;
 
-type SubscribeFunc<T> = (value: T) => void;
-type UnsubscribeFunc = () => void;
-type UpdateFunc<T> = (value: T) => T;
-
-export class State<T> {
-    private value: T;
-    private subscribers: SubscribeFunc<T>[] = [];
+export class State<TState> {
+    private currentState: TState;
+    private subscribers: Subscriber<TState>[] = [];
     private disposed = false;
 
-    constructor(initialValue: T) {
-        this.value = initialValue;
+    constructor(initialState: TState) {
+        this.currentState = initialState;
     }
 
-    public get(): T {
+    public get(): TState {
         this.throwIfDisposed();
-        return this.value;
+        return this.currentState;
     }
 
-    public set(newValue: T): void {
+    public set(newState: TState): void {
         this.throwIfDisposed();
-        this.value = newValue;
+        this.currentState = newState;
         this.notify();
     }
 
-    public update(updater: UpdateFunc<T>): void {
+    public update(updater: Updater<TState>): void {
         this.throwIfDisposed();
-        this.value = updater(this.value);
+        this.currentState = updater(this.currentState);
         this.notify();
     }
 
-    public subscribe(subscriber: SubscribeFunc<T>): UnsubscribeFunc {
+    public subscribe(subscriber: Subscriber<TState>): Unsubscriber {
         this.throwIfDisposed();
         this.subscribers.push(subscriber);
-        subscriber(this.value);
+        subscriber(this.currentState);
         return () => {
             const index = this.subscribers.findIndex((s) => s === subscriber);
             if (index != -1) {
@@ -53,7 +51,7 @@ export class State<T> {
 
     private notify(): void {
         for (const subscriber of this.subscribers) {
-            subscriber(this.value);
+            subscriber(this.currentState);
         }
     }
 
@@ -62,13 +60,4 @@ export class State<T> {
             throw new Error("can't use disposed state");
         }
     }
-}
-
-export function useValue<T>(state: State<T>): T {
-    const subscribe = useCallback(
-        (onStoreChange: SubscribeFunc<T>) => state.subscribe(onStoreChange),
-        [state],
-    );
-    const getSnapshot = useCallback(() => state.get(), [state]);
-    return useSyncExternalStore(subscribe, getSnapshot);
 }

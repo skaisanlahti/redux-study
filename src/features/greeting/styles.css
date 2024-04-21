@@ -1,0 +1,10 @@
+.greeting {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.greeting h1 {
+    text-align: center;
+}

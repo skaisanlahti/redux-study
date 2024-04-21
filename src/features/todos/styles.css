@@ -1,0 +1,21 @@
+.add-todo {
+    display: flex;
+    gap: 1rem;
+}
+
+.add-todo input {
+    flex: 1;
+}
+
+.todo-list {
+    min-width: 800px;
+}
+
+.item {
+    display: flex;
+    gap: 1rem;
+}
+
+.task {
+    flex: 1;
+}
