@@ -1,26 +1,27 @@
+import { uuid } from "./uuid";
+
 export type Action<TPayload extends unknown> = {
-    key: Symbol;
+    type: string;
     payload: TPayload;
 };
 
 export type ActionCreator<TPayload> = {
     (payload: TPayload): Action<TPayload>;
-    key: Symbol;
+    type: string;
     match: (action: Action<any>) => action is Action<TPayload>;
 };
 
-export function createAction<TPayload = void>(description: string = "unnamed action"): ActionCreator<TPayload> {
-    const key = Symbol.for(description);
+export function createAction<TPayload = void>(type: string = uuid()): ActionCreator<TPayload> {
     function factory(payload: TPayload): Action<TPayload> {
         return {
-            key,
+            type: type,
             payload,
         };
     }
 
-    factory.key = key;
+    factory.type = type;
     factory.match = (action: Action<any>): action is Action<TPayload> => {
-        return key === action.key;
+        return type === action.type;
     };
 
     return factory;

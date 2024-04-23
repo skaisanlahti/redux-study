@@ -18,7 +18,7 @@ export type Remover = () => void;
 
 export class Store<TState> {
     private state: State<TState>;
-    private handlersByKey = new Map<Symbol, Handler<TState, any>[]>();
+    private handlersByKey = new Map<string, Handler<TState, any>[]>();
     private effects: Effect<TState>[] = [];
 
     constructor(initialState: TState) {
@@ -26,16 +26,16 @@ export class Store<TState> {
     }
 
     public addHandler = <TPayload>(action: ActionCreator<TPayload>, handler: Handler<TState, TPayload>): Remover => {
-        const handlers = this.handlersByKey.get(action.key) ?? [];
+        const handlers = this.handlersByKey.get(action.type) ?? [];
         if (handlers.length === 0) {
-            this.handlersByKey.set(action.key, handlers);
+            this.handlersByKey.set(action.type, handlers);
         }
 
         handlers.push(handler);
         return () => {
             handlers.splice(handlers.indexOf(handler), 1);
             if (handlers.length === 0) {
-                this.handlersByKey.delete(action.key);
+                this.handlersByKey.delete(action.type);
             }
         };
     };
@@ -51,7 +51,7 @@ export class Store<TState> {
         const currentState = this.state.get();
         let nextState = currentState;
 
-        const handlers = this.handlersByKey.get(action.key);
+        const handlers = this.handlersByKey.get(action.type);
         if (handlers) {
             for (const handler of handlers) {
                 nextState = produce<TState>(nextState, (draft) => {

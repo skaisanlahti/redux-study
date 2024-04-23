@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { useDispatch, useSelector } from "../hooks";
 import { AddTodoAction, TodoSelector } from "./module";
 
 export function AddTodo() {
     const dispatch = useDispatch();
-    const task = useSelector(TodoSelector.selectTask);
     const error = useSelector(TodoSelector.selectError);
+    const [task, setTask] = useState("");
 
     return (
         <div className="add-todo">
@@ -18,14 +19,18 @@ export function AddTodo() {
                     type="text"
                     placeholder="Description..."
                     value={task}
+                    onBlur={() => {
+                        dispatch(AddTodoAction.taskChanged(task));
+                    }}
                     onChange={(e) => {
-                        dispatch(AddTodoAction.taskChanged(e.target.value));
+                        setTask(e.target.value);
                     }}
                 />
                 <button
                     type="submit"
                     onClick={() => {
                         dispatch(AddTodoAction.taskSubmitted(task));
+                        setTask("");
                     }}
                 >
                     submit

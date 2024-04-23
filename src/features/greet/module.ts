@@ -76,7 +76,7 @@ export function setupGreetingEffects(store: Store<RootState>) {
 
 function logAction(context: DispatchContext<RootState>) {
     console.log(
-        `${context.action.key.description}: state ${context.currentState === context.previousState ? "did not change" : "changed"}`,
+        `${context.action.type}: state ${context.currentState === context.previousState ? "did not change" : "changed"}`,
     );
 }
 
