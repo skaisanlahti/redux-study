@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "../hooks";
-import { Todo, TodoListAction, TodoSelector } from "./handlers";
+import { Todo, TodoListAction, TodoSelector } from "./module";
 
 export function TodoList() {
     const todoItems = useSelector(TodoSelector.selectTodoItems);
