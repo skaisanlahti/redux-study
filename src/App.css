@@ -1,4 +1,4 @@
-@import "./features/greeting/styles.css";
+@import "./features/greet/styles.css";
 @import "./features/todos/styles.css";
 
 #root {

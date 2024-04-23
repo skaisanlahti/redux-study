@@ -3,7 +3,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import { AddTodo } from "./features/todos/AddTodo";
 import { TodoList } from "./features/todos/TodoList";
-import { Greeting } from "./features/greeting/Greeting";
+import { Greeting } from "./features/greet/Greeting";
 
 function App() {
     return (

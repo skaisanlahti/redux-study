@@ -1,28 +1,37 @@
 import { useDispatch, useSelector } from "../hooks";
-import { AddTodoAction } from "./store";
+import { AddTodoAction, TodoSelector } from "./module";
 
 export function AddTodo() {
     const dispatch = useDispatch();
-    const task = useSelector((state) => state.todos.task);
-    const error = useSelector((state) => state.todos.error);
+    const task = useSelector(TodoSelector.selectTask);
+    const error = useSelector(TodoSelector.selectError);
 
     return (
         <div className="add-todo">
-            <input
-                type="text"
-                value={task}
-                onChange={(e) => {
-                    dispatch(AddTodoAction.taskChanged(e.target.value));
-                }}
-            />
-            <button
-                onClick={() => {
-                    dispatch(AddTodoAction.taskSubmitted(task));
+            <form
+                className="form"
+                onSubmit={(e) => {
+                    e.preventDefault();
                 }}
             >
-                submit
-            </button>
-            <p>{error}</p>
+                <input
+                    type="text"
+                    placeholder="Description..."
+                    value={task}
+                    onChange={(e) => {
+                        dispatch(AddTodoAction.taskChanged(e.target.value));
+                    }}
+                />
+                <button
+                    type="submit"
+                    onClick={() => {
+                        dispatch(AddTodoAction.taskSubmitted(task));
+                    }}
+                >
+                    submit
+                </button>
+            </form>
+            <p className="error">{error}</p>
         </div>
     );
 }

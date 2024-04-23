@@ -2,79 +2,62 @@ import { Draft, produce } from "immer";
 import { useSyncExternalStore } from "react";
 import { State, Subscriber, Unsubscriber } from "./state";
 import { createTypeSafeContext } from "./context";
+import { Action, ActionCreator } from "./action";
 
-export type Action<TPayload extends unknown> = {
-    key: Symbol;
-    payload: TPayload;
-};
-
-export type ActionCreator<TPayload> = {
-    (payload: TPayload): Action<TPayload>;
-    key: Symbol;
-    match: (action: Action<any>) => action is Action<TPayload>;
-};
-
-export type Dispatch<TPayload = unknown> = (action: Action<TPayload>) => void;
-export type Handler<TState, TPayload> = (state: Draft<TState>, action: Action<TPayload>) => Draft<TState> | void;
-export type EffectContext<TState, TPayload> = {
+export type DispatchContext<TState, TPayload = unknown> = {
     action: Action<TPayload>;
     currentState: TState;
     previousState: TState;
-    dispatch: Dispatch;
+    dispatch: Dispatch<TState, TPayload>;
 };
 
-export type Effect<TState, TPayload> = (context: EffectContext<TState, TPayload>) => any;
+export type Dispatch<TState, TPayload> = (action: Action<TPayload>) => DispatchContext<TState, TPayload>;
+export type Handler<TState, TPayload> = (state: Draft<TState>, payload: TPayload) => Draft<TState> | void;
+export type Effect<TState, TPayload = unknown> = (context: DispatchContext<TState, TPayload>) => any;
 export type Remover = () => void;
-
-export function createAction<TPayload>(description: string = "unnamed action"): ActionCreator<TPayload> {
-    const key = Symbol.for(description);
-    function factory(payload: TPayload): Action<TPayload> {
-        return {
-            key,
-            payload,
-        };
-    }
-
-    factory.key = key;
-    factory.match = (action: Action<any>): action is Action<TPayload> => {
-        return key === action.key;
-    };
-
-    return factory;
-}
 
 export class Store<TState> {
     private state: State<TState>;
-    private handlersByKey = new Map<Symbol, Handler<TState, any>>();
-    private effects: Effect<TState, any>[] = [];
+    private handlersByKey = new Map<Symbol, Handler<TState, any>[]>();
+    private effects: Effect<TState>[] = [];
 
     constructor(initialState: TState) {
         this.state = new State(initialState);
     }
 
     public addHandler = <TPayload>(action: ActionCreator<TPayload>, handler: Handler<TState, TPayload>): Remover => {
-        this.handlersByKey.set(action.key, handler);
+        const handlers = this.handlersByKey.get(action.key) ?? [];
+        if (handlers.length === 0) {
+            this.handlersByKey.set(action.key, handlers);
+        }
+
+        handlers.push(handler);
         return () => {
-            this.handlersByKey.delete(action.key);
+            handlers.splice(handlers.indexOf(handler), 1);
+            if (handlers.length === 0) {
+                this.handlersByKey.delete(action.key);
+            }
         };
     };
 
-    public addEffect = <TPayload>(effect: Effect<TState, TPayload>): Remover => {
+    public addEffect = (effect: Effect<TState>): Remover => {
         this.effects.push(effect);
         return () => {
             this.effects.splice(this.effects.indexOf(effect), 1);
         };
     };
 
-    public dispatch = (action: Action<unknown>): void => {
+    public dispatch = <TPayload>(action: Action<TPayload>): DispatchContext<TState, TPayload> => {
         const currentState = this.state.get();
         let nextState = currentState;
 
-        const handler = this.handlersByKey.get(action.key);
-        if (handler) {
-            nextState = produce<TState>(currentState, (draft) => {
-                handler(draft, action);
-            });
+        const handlers = this.handlersByKey.get(action.key);
+        if (handlers) {
+            for (const handler of handlers) {
+                nextState = produce<TState>(nextState, (draft) => {
+                    handler(draft, action.payload);
+                });
+            }
 
             this.state.set(nextState);
         }
@@ -97,6 +80,8 @@ export class Store<TState> {
 
             task();
         }
+
+        return context;
     };
 
     public getState = (): TState => {
@@ -112,14 +97,14 @@ export function createStoreHooks<TState>() {
     const [useStore, StoreProvider, StoreConsumer] = createTypeSafeContext<Store<TState>>();
 
     function useStoreDispatch() {
-        const providedStore = useStore();
-        return providedStore.dispatch;
+        const store = useStore();
+        return store.dispatch;
     }
 
     function useStoreValue<TResult>(selector: (state: TState) => TResult): TResult {
-        const providedStore = useStore();
-        return useSyncExternalStore(providedStore.subscribe, () => {
-            return selector(providedStore.getState());
+        const store = useStore();
+        return useSyncExternalStore(store.subscribe, () => {
+            return selector(store.getState());
         });
     }
 

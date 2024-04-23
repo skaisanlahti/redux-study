@@ -1,42 +1,19 @@
 import { Store } from "../utils/store";
-import { setupGreetingEffects } from "./greeting/effects";
-import { setupGreetingHandlers } from "./greeting/handlers";
-import { GreetingState } from "./greeting/types";
-import { TodoState } from "./todos/types";
+import { GreetState, getInitialGreetState, setupGreetingEffects, setupGreetingHandlers } from "./greet/module";
+import { TodoState, getInitialTodoState, setupTodoEffects, setupTodoHandlers } from "./todos/module";
 
 export type RootState = {
-    greetings: GreetingState;
+    greet: GreetState;
     todos: TodoState;
 };
 
-const initialState: RootState = {
-    greetings: {
-        greeting: "unset",
-        count: 0,
-    },
-    todos: {
-        task: "",
-        error: "",
-        items: [],
-    },
-};
+export const store = new Store<RootState>({
+    greet: getInitialGreetState(),
+    todos: getInitialTodoState(),
+});
 
-function getInitialState(preloaded: RootState) {
-    try {
-        const json = localStorage.getItem("todos");
-        if (!json) {
-            return preloaded;
-        }
-
-        const todos: TodoState = JSON.parse(json);
-        return { ...preloaded, todos };
-    } catch (e) {
-        console.error(e);
-        localStorage.removeItem("todos");
-        return preloaded;
-    }
-}
-
-export const store = new Store<RootState>(getInitialState(initialState));
 setupGreetingHandlers(store);
 setupGreetingEffects(store);
+
+setupTodoHandlers(store);
+setupTodoEffects(store);

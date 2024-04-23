@@ -1,27 +1,32 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "../hooks";
-import { hello, temporary } from "./actions";
-import { selectDone } from "../../utils/reselect";
+import { GreetSelector, GreetingAction } from "./module";
 
 export function Greeting() {
     const dispatch = useDispatch();
-    const greeting = useSelector((state) => state.greetings.greeting);
-    const count = useSelector((state) => state.greetings.count);
+    const greeting = useSelector(GreetSelector.selectGreeting);
+    const count = useSelector(GreetSelector.selectCount);
     const [open, setOpen] = useState(false);
 
     return (
         <div className="greeting">
             <h1>
-                {greeting} {count}
+                {greeting} {count > 0 && count}
             </h1>
             <button
                 onClick={() => {
-                    dispatch(hello("Hello world"));
+                    dispatch(GreetingAction.greetingClicked("Hello world"));
                 }}
             >
                 greet
             </button>
-            <button onClick={() => setOpen((v) => !v)}>toggle hidden</button>
+            <button
+                onClick={() => {
+                    setOpen((v) => !v);
+                }}
+            >
+                toggle hidden
+            </button>
             {open && <HiddenComponent />}
         </div>
     );
@@ -29,7 +34,6 @@ export function Greeting() {
 
 function HiddenComponent() {
     const store = useStore();
-    const dones = useSelector(selectDone);
 
     useEffect(() => {
         const remove = store.addEffect(() => {
@@ -42,13 +46,11 @@ function HiddenComponent() {
         <div>
             <button
                 onClick={() => {
-                    store.dispatch(temporary());
+                    store.dispatch(GreetingAction.temporary());
                 }}
             >
-                fire temp action {dones!.length}
+                fire temp action
             </button>
-            <h2>done todos</h2>
-            <pre>{JSON.stringify(dones)}</pre>
         </div>
     );
 }

@@ -1,17 +1,11 @@
 import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
-import { todoReducer } from "../features/todos/reducer";
-import { setupTodoListeners } from "../features/todos/listener";
 
 const listener = createListenerMiddleware();
 const appStartListening = listener.startListening.withTypes<AppState, AppDispatch>();
 const appStopListening = listener.stopListening.withTypes<AppState, AppDispatch>();
 
-setupTodoListeners(appStartListening);
-
 export const store = configureStore({
-    reducer: {
-        todos: todoReducer,
-    },
+    reducer: {},
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware().prepend(listener.middleware);
     },

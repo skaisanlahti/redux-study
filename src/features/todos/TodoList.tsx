@@ -1,21 +1,32 @@
 import { useDispatch, useSelector } from "../hooks";
-import { TodoListAction } from "./store";
+import { Todo, TodoListAction, TodoSelector } from "./handlers";
 
 export function TodoList() {
-    const dispatch = useDispatch();
-    const items = useSelector((state) => state.todos.items);
+    const todoItems = useSelector(TodoSelector.selectTodoItems);
+    const doneItems = useSelector(TodoSelector.selectDoneItems);
 
     return (
         <div className="todo-list">
-            {items.map((item) => (
-                <div key={item.id} className="item">
-                    <p className="task">{item.task}</p>
-                    <button onClick={() => dispatch(TodoListAction.todoToggled(item.id))}>
-                        {item.done ? "mark undone" : "mark done"}
-                    </button>
-                    <button onClick={() => dispatch(TodoListAction.todoRemoved(item.id))}>remove</button>
-                </div>
+            <h2>Todo</h2>
+            {todoItems.map((item) => (
+                <Item item={item} />
             ))}
+
+            <h2>Done</h2>
+            {doneItems.map((item) => (
+                <Item item={item} />
+            ))}
+        </div>
+    );
+}
+
+function Item({ item }: { item: Todo }) {
+    const dispatch = useDispatch();
+    return (
+        <div key={item.id} className="item">
+            <p className="task">{item.task}</p>
+            <button onClick={() => dispatch(TodoListAction.todoToggled(item.id))}>{item.done ? "todo" : "done"}</button>
+            <button onClick={() => dispatch(TodoListAction.todoRemoved(item.id))}>remove</button>
         </div>
     );
 }

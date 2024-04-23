@@ -1,46 +1,33 @@
-import { createSelector } from "@reduxjs/toolkit";
-import { RootState } from "../features/store";
+export function createReselector<TState, TResult, TSelectors extends any[]>(
+    selectors: { [K in keyof TSelectors]: (state: any) => TSelectors[K] },
+    transform: (...args: TSelectors) => TResult,
+): (state: TState) => TResult {
+    let cachedState: TState;
+    let cachedInputs = new Array(selectors.length);
+    let cachedResult: TResult;
 
-export const selectDone = createSelector([(state: RootState) => state.todos.items], (todos) => {
-    console.log("ran");
-    return todos.filter((t) => t.done);
-});
+    const reselector = (state: TState) => {
+        if (state === cachedState) {
+            return cachedResult;
+        }
 
-export const mySelectDone = myCreateSelector([(state: RootState) => state.todos.items], (todos: any) => {
-    console.log("ran");
-    return todos.filter((t: any) => t.done);
-});
+        cachedState = state;
+        let changes = 0;
+        for (let i = 0; i < selectors.length; i++) {
+            const input = selectors[i](state);
+            if (cachedInputs[i] !== input) {
+                cachedInputs[i] = input;
+                changes++;
+            }
+        }
 
-export function myCreateSelector(...createSelectorArgs: any[]) {
-    console.log(createSelectorArgs);
-    let lastResult: any;
+        if (changes === 0) {
+            return cachedResult;
+        }
 
-    let resultFunc = createSelectorArgs.pop();
-    const dependencies = createSelectorArgs[0];
+        cachedResult = transform(...(cachedInputs as TSelectors));
+        return cachedResult;
+    };
 
-    let memoizedResultFunc = memoize(function () {
-        return resultFunc.apply(null, arguments);
-    });
-
-    const selector = argsMemoize(function selector() {
-        const inputSelectorResults = collectInputSelectorResults(dependencies, arguments);
-
-        lastResult = memoizedResultFunc.apply(null, inputSelectorResults);
-        return lastResult;
-    });
-
-    return selector;
-}
-
-function memoize(func: any) {
-    return func;
-}
-
-function argsMemoize(func: any) {
-    return func;
-}
-
-function collectInputSelectorResults(deps: any, args: any) {
-    console.log(deps);
-    return args;
+    return reselector;
 }

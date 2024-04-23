@@ -1,21 +1,37 @@
 .add-todo {
-    display: flex;
-    gap: 1rem;
-}
+    & .form {
+        display: flex;
+        gap: 1rem;
 
-.add-todo input {
-    flex: 1;
+        & input {
+            flex: 1;
+        }
+    }
+
+    & .error {
+        text-align: center;
+        color: red;
+
+        &:after {
+            content: "\200b";
+        }
+    }
 }
 
 .todo-list {
     min-width: 800px;
-}
 
-.item {
-    display: flex;
-    gap: 1rem;
-}
+    & .item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
 
-.task {
-    flex: 1;
+    & .task {
+        flex: 1;
+    }
+
+    & button {
+        min-width: 9rem;
+    }
 }
