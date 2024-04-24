@@ -9,12 +9,12 @@ export function TodoList() {
         <div className="todo-list">
             <h2>Todo</h2>
             {todoItems.map((item) => (
-                <Item item={item} />
+                <Item key={item.id} item={item} />
             ))}
 
             <h2>Done</h2>
             {doneItems.map((item) => (
-                <Item item={item} />
+                <Item key={item.id} item={item} />
             ))}
         </div>
     );
@@ -23,7 +23,7 @@ export function TodoList() {
 function Item({ item }: { item: Todo }) {
     const dispatch = useDispatch();
     return (
-        <div key={item.id} className="item">
+        <div className="item">
             <p className="task">{item.task}</p>
             <button onClick={() => dispatch(TodoListAction.todoToggled(item.id))}>{item.done ? "todo" : "done"}</button>
             <button onClick={() => dispatch(TodoListAction.todoRemoved(item.id))}>remove</button>

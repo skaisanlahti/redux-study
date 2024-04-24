@@ -1,6 +1,6 @@
 import { uuid } from "./uuid";
 
-export type Action<TPayload extends unknown> = {
+export type Action<TPayload = unknown> = {
     type: string;
     payload: TPayload;
 };

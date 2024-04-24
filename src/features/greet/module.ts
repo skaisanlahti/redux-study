@@ -1,7 +1,8 @@
 import { createAction } from "../../utils/action";
+import { EffectContext } from "../../utils/listener";
 import { sleep } from "../../utils/sleep";
-import { DispatchContext, Store } from "../../utils/store";
-import { RootState } from "../store";
+import { Store } from "../../utils/store";
+import { AppState } from "../store";
 
 export type GreetState = {
     greeting: string;
@@ -16,8 +17,8 @@ export function getInitialGreetState(): GreetState {
 }
 
 export const GreetSelector = {
-    selectGreeting: (state: RootState) => state.greet.greeting,
-    selectCount: (state: RootState) => state.greet.count,
+    selectGreeting: (state: AppState) => state.greet.greeting,
+    selectCount: (state: AppState) => state.greet.count,
 };
 
 export const GreetingAction = {
@@ -27,15 +28,15 @@ export const GreetingAction = {
 };
 
 export const GreetEffect = {
-    respondedToGreeting: createAction<string>("[GreetingEffect] responded to greeting"),
+    responded: createAction<string>("[GreetEffect] responded"),
 };
 
-export function setupGreetingReducers(store: Store<RootState>) {
+export function setupGreetingReducers(store: Store<AppState>) {
     store.addReducer(GreetingAction.greetingClicked, (state, greeting) => {
         state.greet.greeting = greeting;
     });
 
-    store.addReducer(GreetEffect.respondedToGreeting, (state, greeting) => {
+    store.addReducer(GreetEffect.responded, (state, greeting) => {
         state.greet.greeting = greeting;
     });
 
@@ -48,7 +49,7 @@ export function setupGreetingReducers(store: Store<RootState>) {
     });
 }
 
-export function setupGreetingListeners(store: Store<RootState>) {
+export function setupGreetingListeners(store: Store<AppState>) {
     store.addListener((context) => {
         if (context.currentState.greet.greeting === context.previousState.greet.greeting) {
             return;
@@ -64,7 +65,7 @@ export function setupGreetingListeners(store: Store<RootState>) {
 
         await sleep(5000);
 
-        context.dispatch(GreetEffect.respondedToGreeting("Goodbye world"));
+        context.dispatch(GreetEffect.responded("Goodbye world"));
     });
 
     store.addListener(logAction);
@@ -74,7 +75,7 @@ export function setupGreetingListeners(store: Store<RootState>) {
     });
 }
 
-function logAction(context: DispatchContext<RootState>) {
+function logAction(context: EffectContext<AppState>) {
     console.log(
         `${context.action.type}: state ${context.currentState === context.previousState ? "did not change" : "changed"}`,
     );

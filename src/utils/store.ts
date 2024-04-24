@@ -2,18 +2,11 @@ import { useSyncExternalStore } from "react";
 import { State, Subscriber } from "./state";
 import { createTypeSafeContext } from "./context";
 import { Action, ActionCreator } from "./action";
-import { Effect, Listener } from "./listener";
 import { Handler, Reducer } from "./reducer";
 import { Cleanup } from "./disposer";
+import { Effect, Listener } from "./listener";
 
-export type DispatchContext<TState, TPayload = unknown> = {
-    action: Action<TPayload>;
-    currentState: TState;
-    previousState: TState;
-    dispatch: Dispatch<TState, TPayload>;
-};
-
-export type Dispatch<TState, TPayload> = (action: Action<TPayload>) => DispatchContext<TState, TPayload>;
+export type Dispatch<TPayload = unknown> = (action: Action<TPayload>) => void;
 
 export class Store<TState> {
     constructor(
@@ -22,19 +15,17 @@ export class Store<TState> {
         private listener: Listener<TState>,
     ) {}
 
-    public dispatch = <TPayload>(action: Action<TPayload>): DispatchContext<TState, TPayload> => {
+    public dispatch = <TPayload>(action: Action<TPayload>): void => {
         const state = this.state.get();
         const nextState = this.reducer.reduce(state, action);
-        const context = {
+        this.state.set(nextState);
+        this.listener.trigger({
             action,
             currentState: nextState,
             previousState: state,
             dispatch: this.dispatch,
-        };
-
-        this.state.set(nextState);
-        this.listener.trigger(context);
-        return context;
+            getState: this.getState,
+        });
     };
 
     public getState = (): TState => {
@@ -49,8 +40,8 @@ export class Store<TState> {
         return this.reducer.addCase(action, handler);
     };
 
-    public addListener = (listener: Effect<TState>): Cleanup => {
-        return this.listener.addEffect(listener);
+    public addListener = (effect: Effect<TState>): Cleanup => {
+        return this.listener.addListener(effect);
     };
 }
 

@@ -2,7 +2,7 @@ import { createAction } from "../../utils/action";
 import { createReselector } from "../../utils/reselect";
 import { Store } from "../../utils/store";
 import { uuid } from "../../utils/uuid";
-import { RootState } from "../store";
+import { AppState } from "../store";
 
 export type Todo = {
     id: string;
@@ -30,12 +30,12 @@ export function getInitialTodoState(): TodoState {
 }
 
 export const TodoSelector = {
-    selectTask: (state: RootState) => state.todos.task,
-    selectError: (state: RootState) => state.todos.error,
-    selectTodoItems: createReselector([(state: RootState) => state.todos.items], (items) => {
+    selectTask: (state: AppState) => state.todos.task,
+    selectError: (state: AppState) => state.todos.error,
+    selectTodoItems: createReselector([(state: AppState) => state.todos.items], (items) => {
         return items.filter((t) => !t.done);
     }),
-    selectDoneItems: createReselector([(state: RootState) => state.todos.items], (items) => {
+    selectDoneItems: createReselector([(state: AppState) => state.todos.items], (items) => {
         return items.filter((t) => t.done);
     }),
 };
@@ -50,7 +50,7 @@ export const TodoListAction = {
     todoRemoved: createAction<string>("[TodoList] todo removed"),
 };
 
-export function setupTodoReducers(store: Store<RootState>) {
+export function setupTodoReducers(store: Store<AppState>) {
     store.addReducer(AddTodoAction.taskChanged, (state, task) => {
         state.todos.task = task;
         state.todos.error = "";
@@ -84,7 +84,7 @@ export function setupTodoReducers(store: Store<RootState>) {
     });
 }
 
-export function setupTodoListeners(store: Store<RootState>) {
+export function setupTodoListeners(store: Store<AppState>) {
     store.addListener((context) => {
         if (context.currentState.todos === context.previousState.todos) {
             return;

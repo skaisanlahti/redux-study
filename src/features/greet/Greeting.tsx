@@ -34,13 +34,12 @@ export function Greeting() {
 
 function HiddenComponent() {
     const store = useStore();
-
     useEffect(() => {
-        const remove = store.addListener(() => {
-            console.log("temporary effect fired");
+        const remove = store.addListener((context) => {
+            console.log("hidden component logged:", context.action.type);
         });
         return remove;
-    }, [store]);
+    }, []);
 
     return (
         <div>

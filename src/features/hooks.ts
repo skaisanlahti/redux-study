@@ -1,5 +1,6 @@
+import { addListener } from "../utils/listener";
 import { createStoreHooks } from "../utils/store";
-import { RootState } from "./store";
+import { AppState } from "./store";
 
 export const {
     useStoreDispatch: useDispatch,
@@ -7,4 +8,6 @@ export const {
     useStore,
     StoreProvider,
     StoreConsumer,
-} = createStoreHooks<RootState>();
+} = createStoreHooks<AppState>();
+
+export const addEffect = addListener.withTypes<AppState>();

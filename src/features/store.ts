@@ -5,12 +5,12 @@ import { Store } from "../utils/store";
 import { GreetState, getInitialGreetState, setupGreetingListeners, setupGreetingReducers } from "./greet/module";
 import { TodoState, getInitialTodoState, setupTodoListeners, setupTodoReducers } from "./todos/module";
 
-export type RootState = {
+export type AppState = {
     greet: GreetState;
     todos: TodoState;
 };
 
-export const store = new Store<RootState>(
+export const store = new Store<AppState>(
     new State({
         greet: getInitialGreetState(),
         todos: getInitialTodoState(),

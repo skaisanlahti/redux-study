@@ -6,8 +6,8 @@ export function createReselector<TState, TResult, TSelectors extends any[]>(
     let cachedInputs = new Array(selectors.length);
     let cachedResult: TResult;
 
-    const reselector = (state: TState) => {
-        if (state === cachedState) {
+    function reselect(state: TState) {
+        if (Object.is(state, cachedState)) {
             return cachedResult;
         }
 
@@ -15,10 +15,12 @@ export function createReselector<TState, TResult, TSelectors extends any[]>(
         let changes = 0;
         for (let i = 0; i < selectors.length; i++) {
             const input = selectors[i](state);
-            if (cachedInputs[i] !== input) {
-                cachedInputs[i] = input;
-                changes++;
+            if (Object.is(cachedInputs[i], input)) {
+                continue;
             }
+
+            cachedInputs[i] = input;
+            changes++;
         }
 
         if (changes === 0) {
@@ -27,7 +29,7 @@ export function createReselector<TState, TResult, TSelectors extends any[]>(
 
         cachedResult = transform(...(cachedInputs as TSelectors));
         return cachedResult;
-    };
+    }
 
-    return reselector;
+    return reselect;
 }
