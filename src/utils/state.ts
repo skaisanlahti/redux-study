@@ -1,5 +1,6 @@
+import { Cleanup } from "./disposer";
+
 export type Subscriber<TState> = (state: TState) => void;
-export type Unsubscriber = () => void;
 export type Updater<TState> = (state: TState) => TState;
 
 export class State<TState> {
@@ -24,7 +25,7 @@ export class State<TState> {
         this.notify();
     }
 
-    public subscribe(subscriber: Subscriber<TState>): Unsubscriber {
+    public subscribe(subscriber: Subscriber<TState>): Cleanup {
         this.subscribers.push(subscriber);
         subscriber(this.currentState);
         return () => {

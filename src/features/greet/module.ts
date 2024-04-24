@@ -30,26 +30,26 @@ export const GreetEffect = {
     respondedToGreeting: createAction<string>("[GreetingEffect] responded to greeting"),
 };
 
-export function setupGreetingHandlers(store: Store<RootState>) {
-    store.addHandler(GreetingAction.greetingClicked, (state, greeting) => {
+export function setupGreetingReducers(store: Store<RootState>) {
+    store.addReducer(GreetingAction.greetingClicked, (state, greeting) => {
         state.greet.greeting = greeting;
     });
 
-    store.addHandler(GreetEffect.respondedToGreeting, (state, greeting) => {
+    store.addReducer(GreetEffect.respondedToGreeting, (state, greeting) => {
         state.greet.greeting = greeting;
     });
 
-    store.addHandler(GreetingAction.greetingChanged, (state) => {
+    store.addReducer(GreetingAction.greetingChanged, (state) => {
         state.greet.count += 1;
     });
 
-    store.addHandler(GreetingAction.greetingChanged, (state) => {
+    store.addReducer(GreetingAction.greetingChanged, (state) => {
         state.greet.count += 2;
     });
 }
 
-export function setupGreetingEffects(store: Store<RootState>) {
-    store.addEffect((context) => {
+export function setupGreetingListeners(store: Store<RootState>) {
+    store.addListener((context) => {
         if (context.currentState.greet.greeting === context.previousState.greet.greeting) {
             return;
         }
@@ -57,7 +57,7 @@ export function setupGreetingEffects(store: Store<RootState>) {
         context.dispatch(GreetingAction.greetingChanged());
     });
 
-    store.addEffect(async (context) => {
+    store.addListener(async (context) => {
         if (!GreetingAction.greetingClicked.match(context.action)) {
             return;
         }
@@ -67,9 +67,9 @@ export function setupGreetingEffects(store: Store<RootState>) {
         context.dispatch(GreetEffect.respondedToGreeting("Goodbye world"));
     });
 
-    store.addEffect(logAction);
+    store.addListener(logAction);
 
-    store.addEffect(() => {
+    store.addListener(() => {
         throwErrorPercent(10);
     });
 }

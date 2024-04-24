@@ -1,10 +1,10 @@
-type DisposeFunc = () => void;
+export type Cleanup = () => void;
 
 export class Disposer {
-    private disposers: DisposeFunc[] = [];
+    private disposers: Cleanup[] = [];
 
-    public add(disposer: DisposeFunc): Disposer {
-        this.disposers.push(disposer);
+    public add(dispose: Cleanup): Disposer {
+        this.disposers.push(dispose);
         return this;
     }
 

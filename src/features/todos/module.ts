@@ -50,13 +50,13 @@ export const TodoListAction = {
     todoRemoved: createAction<string>("[TodoList] todo removed"),
 };
 
-export function setupTodoHandlers(store: Store<RootState>) {
-    store.addHandler(AddTodoAction.taskChanged, (state, task) => {
+export function setupTodoReducers(store: Store<RootState>) {
+    store.addReducer(AddTodoAction.taskChanged, (state, task) => {
         state.todos.task = task;
         state.todos.error = "";
     });
 
-    store.addHandler(AddTodoAction.taskSubmitted, (state, task) => {
+    store.addReducer(AddTodoAction.taskSubmitted, (state, task) => {
         if (!task) {
             state.todos.error = "task can't be empty";
             return;
@@ -68,14 +68,14 @@ export function setupTodoHandlers(store: Store<RootState>) {
         state.todos.error = "";
     });
 
-    store.addHandler(TodoListAction.todoRemoved, (state, id) => {
+    store.addReducer(TodoListAction.todoRemoved, (state, id) => {
         const index = state.todos.items.findIndex((item) => item.id === id);
         if (index !== -1) {
             state.todos.items.splice(index, 1);
         }
     });
 
-    store.addHandler(TodoListAction.todoToggled, (state, id) => {
+    store.addReducer(TodoListAction.todoToggled, (state, id) => {
         const index = state.todos.items.findIndex((item) => item.id === id);
         if (index !== -1) {
             const item = state.todos.items[index];
@@ -84,8 +84,8 @@ export function setupTodoHandlers(store: Store<RootState>) {
     });
 }
 
-export function setupTodoEffects(store: Store<RootState>) {
-    store.addEffect((context) => {
+export function setupTodoListeners(store: Store<RootState>) {
+    store.addListener((context) => {
         if (context.currentState.todos === context.previousState.todos) {
             return;
         }

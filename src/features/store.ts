@@ -1,19 +1,26 @@
+import { Listener } from "../utils/listener";
+import { Reducer } from "../utils/reducer";
+import { State } from "../utils/state";
 import { Store } from "../utils/store";
-import { GreetState, getInitialGreetState, setupGreetingEffects, setupGreetingHandlers } from "./greet/module";
-import { TodoState, getInitialTodoState, setupTodoEffects, setupTodoHandlers } from "./todos/module";
+import { GreetState, getInitialGreetState, setupGreetingListeners, setupGreetingReducers } from "./greet/module";
+import { TodoState, getInitialTodoState, setupTodoListeners, setupTodoReducers } from "./todos/module";
 
 export type RootState = {
     greet: GreetState;
     todos: TodoState;
 };
 
-export const store = new Store<RootState>({
-    greet: getInitialGreetState(),
-    todos: getInitialTodoState(),
-});
+export const store = new Store<RootState>(
+    new State({
+        greet: getInitialGreetState(),
+        todos: getInitialTodoState(),
+    }),
+    new Reducer(),
+    new Listener(),
+);
 
-setupGreetingHandlers(store);
-setupGreetingEffects(store);
+setupGreetingReducers(store);
+setupGreetingListeners(store);
 
-setupTodoHandlers(store);
-setupTodoEffects(store);
+setupTodoReducers(store);
+setupTodoListeners(store);

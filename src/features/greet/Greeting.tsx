@@ -36,7 +36,7 @@ function HiddenComponent() {
     const store = useStore();
 
     useEffect(() => {
-        const remove = store.addEffect(() => {
+        const remove = store.addListener(() => {
             console.log("temporary effect fired");
         });
         return remove;
