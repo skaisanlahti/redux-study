@@ -15,8 +15,8 @@ export class State<TState> {
         return this.currentState;
     }
 
-    public set(newState: TState): void {
-        this.currentState = newState;
+    public set(nextState: TState): void {
+        this.currentState = nextState;
         this.notify();
     }
 

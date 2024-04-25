@@ -12,6 +12,7 @@
         text-align: center;
         color: red;
 
+        /* take space even with empty string */
         &:after {
             content: "\200b";
         }
