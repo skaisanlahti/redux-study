@@ -28,41 +28,18 @@ export type Effect<TState = unknown> = (context: EffectContext<TState>) => any;
 export class Listener<TState> {
     private effects: Effect<TState>[] = [];
 
-    public addListener = (effect: Effect<TState>): Cleanup => {
-        const safeEffect = async (context: EffectContext<TState>) => {
-            try {
-                await effect(context);
-            } catch (e) {
-                console.warn(`uncaugh error in effect after ${context.action.type}`, e);
-            }
-        };
-
-        this.effects.push(safeEffect);
+    public addListener(effect: Effect<TState>): Cleanup {
+        this.effects.push(effect);
         return () => {
-            this.effects.splice(this.effects.indexOf(safeEffect), 1);
+            this.effects.splice(this.effects.indexOf(effect), 1);
         };
-    };
+    }
 
-    public trigger = (context: EffectContext<TState>) => {
+    public trigger(context: EffectContext<TState>) {
         for (const effect of this.effects) {
             effect(context);
         }
-    };
-
-    public middleware = (store: Store<TState>) => (next: Dispatch) => (action: Action) => {
-        const previousState = store.getState();
-        next(action);
-        const currentState = store.getState();
-        const context = {
-            action,
-            currentState,
-            previousState,
-            dispatch: store.dispatch,
-            getState: store.getState,
-        };
-
-        this.trigger(context);
-    };
+    }
 }
 
 export function createListenerMiddleware<TState>(listener: Listener<TState>) {

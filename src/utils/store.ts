@@ -53,7 +53,7 @@ export function createStoreHooks<TState>() {
         return store.dispatch;
     }
 
-    function useStoreValue<TResult>(selector: (state: TState) => TResult): TResult {
+    function useStoreSelector<TResult>(selector: (state: TState) => TResult): TResult {
         const store = useStore();
         return useSyncExternalStore(store.subscribe, () => {
             return selector(store.getState());
@@ -62,7 +62,7 @@ export function createStoreHooks<TState>() {
 
     return {
         useStoreDispatch,
-        useStoreValue,
+        useStoreSelector,
         useStore,
         StoreProvider,
         StoreConsumer,

@@ -4,7 +4,7 @@ import { AppState } from "./store";
 
 export const {
     useStoreDispatch: useDispatch,
-    useStoreValue: useSelector,
+    useStoreSelector: useSelector,
     useStore,
     StoreProvider,
     StoreConsumer,

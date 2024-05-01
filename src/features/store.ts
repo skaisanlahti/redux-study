@@ -10,14 +10,12 @@ export type AppState = {
     todos: TodoState;
 };
 
-export const store = new Store<AppState>(
-    new State({
-        greet: getInitialGreetState(),
-        todos: getInitialTodoState(),
-    }),
-    new Reducer(),
-    new Listener(),
-);
+const initialState: AppState = {
+    greet: getInitialGreetState(),
+    todos: getInitialTodoState(),
+};
+
+export const store = new Store<AppState>(new State(initialState), new Reducer(), new Listener());
 
 setupGreetingReducers(store);
 setupGreetingListeners(store);
